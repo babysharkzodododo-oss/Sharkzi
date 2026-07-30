@@ -165,6 +165,17 @@
   ul.alts .gap { font-family: var(--mono); color: var(--dim); font-size: 11.5px; }
   ul.alts button { margin-left: 8px; }
   .alt-lines { line-height: 1.45; }
+  ul.alts li.grouphead {
+    border-bottom: 1px solid var(--line); padding: 14px 0 6px; align-items: baseline;
+  }
+  ul.alts li.grouphead:first-child { padding-top: 2px; }
+  ul.alts li.grouphead > span:first-child {
+    font-family: var(--mono); font-size: 11px; color: var(--dim);
+    font-variant-numeric: tabular-nums;
+  }
+  ul.alts li.grouphead b { color: var(--ink); font-weight: 650; }
+  ul.alts li.current { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  ul.alts li.current .gap { color: var(--accent); }
   .banner {
     border: 1px solid color-mix(in srgb, var(--warn) 40%, var(--line));
     background: color-mix(in srgb, var(--warn) 8%, var(--panel));
@@ -280,9 +291,10 @@
   </section>
 
   <section class="panel">
-    <div class="panel-head"><span class="panel-title">5 · Runner-up pairs</span></div>
+    <div class="panel-head"><span class="panel-title">5 · Every matched pair</span><span class="sub" id="matchcount">—</span></div>
     <div class="panel-body">
       <ul class="alts" id="alts"><li style="color:var(--dim)">Nothing searched yet.</li></ul>
+      <p class="note">Every pair above clears all three line-to-line equality checks — same <code>actualBoundingBoxRight</code>, same rightmost ink at DPR 1, same rightmost ink at DPR 3 — whatever endpoint it lands on. Groups are ordered by distance from the target.</p>
     </div>
   </section>
 
@@ -415,6 +427,7 @@
   const poemEl = $("poem"), frameEl = $("frame"), tbody = $("tbody");
   const altsEl = $("alts"), labelSlot = $("labelslot"), labelNote = $("labelnote"), pairStats = $("pairstats");
   const copyPoemBtn = $("copypoem"), copyTableBtn = $("copytable");
+  const matchCount = $("matchcount");
 
   $("poolsize").textContent = LINES_A.length + " × " + LINES_B.length + " = " +
     (LINES_A.length * LINES_B.length).toLocaleString() + " pairings";
@@ -649,13 +662,37 @@
       <dt>Pairs searched</dt><dd>${all.length.toLocaleString()}</dd>
       <dt>Browser</dt><dd>${chromium ? "Chromium" : "non-Chromium"}</dd>`;
 
-    // alternates
-    altsEl.innerHTML = all.slice(1, 11).map((p, i) => `
-      <li>
+    // Every pair whose two lines land on the same right edge, whatever endpoint that
+    // turns out to be — grouped by endpoint, nearest the target first.
+    const matched = all.map((p, i) => ({ p, i })).filter(({ p }) =>
+      p.ma.right === p.mb.right && p.ma.ink1 === p.mb.ink1 && p.ma.ink3 === p.mb.ink3);
+    matched.sort((x, y) =>
+      Math.abs(x.p.ma.ink3 - target) - Math.abs(y.p.ma.ink3 - target) || x.i - y.i);
+
+    const endpoints = new Set(matched.map(m => m.p.ma.ink3));
+    matchCount.textContent = matched.length
+      ? `${matched.length} matched ${matched.length === 1 ? "pair" : "pairs"} across ${endpoints.size} endpoint${endpoints.size === 1 ? "" : "s"}`
+      : "no matched pairs";
+
+    let html = "", lastEnd = null;
+    for (const { p, i } of matched) {
+      const end = p.ma.ink3;
+      if (end !== lastEnd) {
+        const d = end - target;
+        html += `<li class="grouphead">
+          <span>endpoint <b>${f3(end)} px</b> · width ${f6(p.ma.width)} · bboxRight ${f6(p.ma.right)} · ink@DPR1 ${f3(p.ma.ink1)}</span>
+          <span class="gap">${Math.abs(d) < 1e-6 ? "on target" : (d >= 0 ? "+" : "") + f3(d) + " from target"}</span>
+        </li>`;
+        lastEnd = end;
+      }
+      const current = p === best;
+      html += `<li${current ? ' class="current"' : ''}>
         <span class="alt-lines">${p.a}<br>${p.b}</span>
-        <span class="gap">gap ${f3(p.gap3)} · Δtgt ${f3(p.dist)}
-          <button class="btn-sm" data-idx="${i + 1}">Use</button></span>
-      </li>`).join("");
+        <span class="gap">${current ? "shown above" : `<button class="btn-sm" data-idx="${i}">Use</button>`}</span>
+      </li>`;
+    }
+    altsEl.innerHTML = html ||
+      `<li style="color:var(--dim)">No pair in this pool lands both lines on the same right edge.</li>`;
     altsEl.querySelectorAll("button").forEach(b => {
       b.addEventListener("click", () => render(all[+b.dataset.idx], all, target));
     });

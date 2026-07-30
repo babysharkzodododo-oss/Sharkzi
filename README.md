@@ -38,6 +38,11 @@ A pair passes only when both lines share the same `actualBoundingBoxRight`, the 
 rightmost ink at DPR 1, the same rightmost ink at DPR 3, and land on the target endpoint.
 Anything short of all four is reported as a near miss with its exact deltas.
 
+The **Every matched pair** panel lists every pair clearing the three line-to-line equality
+checks regardless of which endpoint it lands on, grouped by endpoint and ordered by distance
+from the target, with a button to swap any of them into the post. In the shipped pools that
+is 29 pairs across 7 endpoints, 23 of them on the endpoint nearest 300 px.
+
 ## The reachable-endpoint lattice
 
 This Chirp build returns **whole-number advances** at 22.6666667 px — verified across all 90
