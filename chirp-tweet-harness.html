@@ -1,0 +1,765 @@
+<title>Chirp Tweet — 17 pt right-edge measurement harness</title>
+<style>
+  :root {
+    --bg: #0b0e12;
+    --panel: #12171d;
+    --panel-2: #171d25;
+    --line: #232c37;
+    --ink: #e6edf5;
+    --dim: #8a97a8;
+    --dimmer: #5d6a7b;
+    --accent: #1d9bf0;
+    --good: #2ecc71;
+    --warn: #f5b544;
+    --bad: #f4655d;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #eef1f5; --panel: #ffffff; --panel-2: #f6f8fa; --line: #d8dee6;
+      --ink: #14181d; --dim: #5b6675; --dimmer: #8b95a3;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0e12; --panel: #12171d; --panel-2: #171d25; --line: #232c37;
+    --ink: #e6edf5; --dim: #8a97a8; --dimmer: #5d6a7b;
+  }
+  :root[data-theme="light"] {
+    --bg: #eef1f5; --panel: #ffffff; --panel-2: #f6f8fa; --line: #d8dee6;
+    --ink: #14181d; --dim: #5b6675; --dimmer: #8b95a3;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--ui);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  header.masthead { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 22px; }
+  h1 { font-size: 17px; margin: 0 0 4px; letter-spacing: .01em; font-weight: 650; }
+  .sub { color: var(--dim); font-size: 12.5px; margin: 0; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  section { margin-bottom: 22px; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 11px 14px; border-bottom: 1px solid var(--line); background: var(--panel-2);
+    flex-wrap: wrap;
+  }
+  .panel-title { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); font-weight: 650; }
+  .panel-body { padding: 14px; }
+
+  /* ---- font intake ---- */
+  #drop {
+    border: 1.5px dashed var(--line); border-radius: 9px; padding: 22px 16px; text-align: center;
+    background: var(--panel-2); transition: border-color .15s, background .15s; cursor: pointer;
+  }
+  #drop.hot { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--panel-2)); }
+  #drop strong { display: block; font-size: 13.5px; margin-bottom: 3px; }
+  #drop span { color: var(--dim); font-size: 12px; }
+  input[type=file] { display: none; }
+
+  .status { display: flex; align-items: center; gap: 8px; font-size: 12.5px; margin-top: 12px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dimmer); flex: none; }
+  .dot.ok { background: var(--good); }
+  .dot.err { background: var(--bad); }
+  .dot.busy { background: var(--warn); }
+
+  .controls { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
+  label.field { display: flex; flex-direction: column; gap: 5px; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+  input[type=number] {
+    font-family: var(--mono); font-size: 14px; width: 120px; padding: 7px 9px;
+    background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); border-radius: 7px;
+  }
+  button {
+    font: inherit; font-size: 13px; font-weight: 550; padding: 8px 14px; border-radius: 7px;
+    border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); cursor: pointer;
+  }
+  button:hover:not(:disabled) { border-color: var(--dimmer); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover:not(:disabled) { filter: brightness(1.08); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-sm { font-size: 11.5px; padding: 5px 10px; }
+
+  /* ---- the post ---- */
+  .post-stage { background: #ffffff; color: #0f1419; border-radius: 10px; padding: 18px 16px 16px; position: relative; }
+  .post-head { display: flex; gap: 11px; align-items: center; margin-bottom: 10px; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: #cfd9de; flex: none; }
+  .who { font-family: var(--ui); font-size: 14px; line-height: 1.25; }
+  .who b { font-weight: 700; color: #0f1419; }
+  .who span { color: #536471; }
+  .poem-frame { position: relative; display: inline-block; }
+  #poem {
+    font-family: "ChirpMeasure", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 22.6666667px;
+    font-weight: 400;
+    line-height: 1.3125;
+    color: #0f1419;
+    white-space: pre;
+    margin: 0;
+    letter-spacing: 0;
+    word-spacing: 0;
+  }
+  .guide {
+    position: absolute; top: -4px; bottom: -4px; width: 1px; background: var(--accent);
+    pointer-events: none;
+  }
+  .guide::after {
+    content: attr(data-label); position: absolute; top: -16px; left: 4px;
+    font-family: var(--mono); font-size: 9.5px; color: var(--accent); white-space: nowrap;
+  }
+  .bbox { position: absolute; border: 1px solid rgba(244,101,93,.8); pointer-events: none; }
+  .fontless { color: #536471; font-style: normal; font-size: 14px; }
+
+  /* ---- table ---- */
+  .tablescroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th {
+    font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim);
+    font-weight: 650; background: var(--panel-2); position: sticky; top: 0;
+  }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  td.sentence { white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+  tr:last-child td { border-bottom: none; }
+  .yes { color: var(--good); }
+  .no { color: var(--bad); }
+  .delta-zero { color: var(--good); }
+
+  .label-badge {
+    display: inline-flex; align-items: center; gap: 8px; padding: 8px 13px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; border: 1px solid var(--line); background: var(--panel-2);
+  }
+  .label-badge.pass { border-color: color-mix(in srgb, var(--good) 55%, var(--line)); color: var(--good); }
+  .label-badge.near { border-color: color-mix(in srgb, var(--warn) 55%, var(--line)); color: var(--warn); }
+
+  .note { color: var(--dim); font-size: 12px; margin: 10px 0 0; }
+  .note code { font-family: var(--mono); font-size: 11.5px; color: var(--ink); }
+  ul.alts { list-style: none; margin: 0; padding: 0; }
+  ul.alts li {
+    display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 7px 0;
+    border-bottom: 1px solid var(--line); font-size: 12.5px; align-items: center;
+  }
+  ul.alts li:last-child { border-bottom: none; }
+  ul.alts .gap { font-family: var(--mono); color: var(--dim); font-size: 11.5px; }
+  ul.alts button { margin-left: 8px; }
+  .alt-lines { line-height: 1.45; }
+  .banner {
+    border: 1px solid color-mix(in srgb, var(--warn) 40%, var(--line));
+    background: color-mix(in srgb, var(--warn) 8%, var(--panel));
+    border-radius: 9px; padding: 11px 13px; font-size: 12.5px; color: var(--ink);
+  }
+  .banner b { font-weight: 650; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 12.5px; }
+  .kv dt { color: var(--dim); }
+  .kv dd { margin: 0; font-family: var(--mono); }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <h1>Chirp Tweet — right-edge measurement harness</h1>
+    <p class="sub">Two rhyming lines, set in Chirp Regular at 17&nbsp;pt (22.6666667&nbsp;CSS&nbsp;px), searched for a matched visible right edge. Canvas fractional metrics plus per-pixel ink scans at DPR&nbsp;1 and DPR&nbsp;3.</p>
+  </header>
+
+  <section>
+    <div class="banner">
+      <b>The chat window is not the reference.</b> Whatever app you read the two lines in is setting them in its own UI font, at its own size, with its own shaping — the lines will not look aligned there and that says nothing about the result. This page, with your Chirp file loaded from bytes, is the only measurement surface here. No width, bounding box, or pixel column is asserted anywhere until this page has measured it.
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <span class="panel-title">1 · Font intake</span>
+      <span class="sub mono" id="fontname">—</span>
+    </div>
+    <div class="panel-body">
+      <div id="drop" tabindex="0" role="button" aria-label="Choose or drop your Chirp Regular font file">
+        <strong>Drop Chirp Regular here, or click to choose</strong>
+        <span>.woff2 · .woff · .ttf · .otf — read from bytes with FontFace, never fetched, never substituted</span>
+      </div>
+      <input type="file" id="file" accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf">
+      <div class="status"><span class="dot" id="dot"></span><span id="status">No font loaded — nothing measured.</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <span class="panel-title">2 · Search</span>
+      <span class="sub" id="poolsize">—</span>
+    </div>
+    <div class="panel-body">
+      <div class="controls">
+        <label class="field">Target endpoint (CSS px)
+          <input type="number" id="target" value="300" min="80" max="900" step="any">
+        </label>
+        <button class="primary" id="run" disabled>Run search</button>
+        <button id="rescore" disabled>Re-score at new target</button>
+        <button id="snap" disabled>Snap to nearest reachable</button>
+      </div>
+      <p class="note">Pairs are ranked by the gap between the two lines' rightmost ink at DPR&nbsp;3 first, then by distance from the target endpoint. Line-to-line equality is the goal; the target is where they meet. Where fractional metrics and the pixel scan disagree, the pixel scan wins. Ties are broken in pool order, and every pair tied with the winner is listed under runner-ups with a button to swap it in.</p>
+      <p class="note" id="reachnote"></p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <span class="panel-title">3 · The post</span>
+      <span>
+        <button class="btn-sm" id="copypoem" disabled>Copy poem</button>
+        <button class="btn-sm" id="copytable" disabled>Copy table</button>
+      </span>
+    </div>
+    <div class="panel-body">
+      <div class="post-stage">
+        <div class="post-head">
+          <div class="avatar"></div>
+          <div class="who"><b>Draft</b><br><span>@draft</span></div>
+        </div>
+        <div class="poem-frame" id="frame">
+          <p id="poem" class="fontless">No font loaded — nothing measured.</p>
+        </div>
+      </div>
+      <p class="note">White ground, 17&nbsp;pt, exact line break preserved, both lines from one left origin. The vertical rule is the target endpoint; the red outlines are each line's ink bounding box.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <span class="panel-title">4 · Verification</span>
+      <span id="labelslot"></span>
+    </div>
+    <div class="panel-body">
+      <div class="tablescroll">
+        <table id="table">
+          <thead>
+            <tr>
+              <th>#</th><th>Sentence</th><th>Syll ~</th>
+              <th>width</th><th>bboxLeft</th><th>bboxRight</th>
+              <th>Δ target</th><th>Ink @DPR1</th><th>Ink @DPR3</th>
+              <th>No repeats</th><th>Rhyme</th><th>Result</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="12" style="color:var(--dim)">No font loaded — nothing measured.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid2" style="margin-top:16px">
+        <div>
+          <dl class="kv" id="pairstats"></dl>
+        </div>
+        <div>
+          <p class="note" style="margin-top:0" id="labelnote"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><span class="panel-title">5 · Runner-up pairs</span></div>
+    <div class="panel-body">
+      <ul class="alts" id="alts"><li style="color:var(--dim)">Nothing searched yet.</li></ul>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><span class="panel-title">Method</span></div>
+    <div class="panel-body">
+      <p class="note" style="margin-top:0">
+        Measurement font string is the literal <code>normal 400 22.6666667px "ChirpMeasure"</code> with <code>ctx.letterSpacing = "0px"</code> and <code>ctx.wordSpacing = "0px"</code>. Each sentence is measured whole, including its period. Ink scans render one line alone on a transparent canvas from integer x-origin&nbsp;0, with the device ratio set explicitly via <code>setTransform(dpr,0,0,dpr,0,0)</code> rather than read from <code>window.devicePixelRatio</code>, so both DPR&nbsp;1 and DPR&nbsp;3 results are produced on any display. Any alpha above zero counts as ink; the reported value is the right edge of the rightmost inked column converted back to CSS px.
+      </p>
+      <p class="note">
+        A pair passes only when both lines share the same <code>actualBoundingBoxRight</code>, the same rightmost ink at DPR&nbsp;1, the same rightmost ink at DPR&nbsp;3, and land on the target endpoint. Anything short of all four is a near miss and is shown with its exact deltas.
+      </p>
+      <p class="note">
+        Writing constraints enforced on every candidate: one complete sentence ending in its rhyme word plus a period; no commas, emoji, hashtags, double spaces, or space before punctuation; no adjectives; no adverbs; no people's names. The chosen pair additionally has a token-type ratio of 1.0 — no word appears twice across both lines, compared case-insensitively with final punctuation stripped. Syllable counts are approximate.
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const MEASURE_FONT = 'normal 400 22.6666667px "ChirpMeasure"';
+  const CHECK_FONT   = 'normal 400 22.6666667px "ChirpMeasure"';
+  const SCAN_W = 960, SCAN_H = 64, BASELINE = 44, X0 = 0;
+
+  const LINES_A = [
+    "His voice was built on that lie.",
+    "The record opens with our lie.",
+    "Every page begins with his lie.",
+    "That mouth stands on this lie.",
+    "The country stands on her lie.",
+    "The story he sold us was a lie.",
+    "He signed his name under a lie.",
+    "The mirror refuses to hold a lie.",
+    "Somebody paid him to tell that lie.",
+    "The house of his life rests on a lie.",
+    "Trust dies at the moment of a lie.",
+    "I watched the truth become a lie.",
+    "Nothing holds the weight of a lie.",
+    "The oath dissolved into a lie.",
+    "History begins with his lie.",
+    "Time undoes a lie.",
+    "Silence can carry a lie.",
+    "Grief hides under a lie.",
+    "The paper printed his lie.",
+    "The room believed his lie.",
+    "Each apology carries a lie.",
+    "She sells the story as a lie.",
+    "The camera caught his lie.",
+    "There is a cost to every lie.",
+    "His face gives away the lie.",
+    "The crowd repeated his lie.",
+    "He offers his hand and a lie.",
+    "He wrote his history as a lie.",
+    "A microphone carries his lie.",
+    "He keeps a ledger of each lie.",
+    "What he calls memory is a lie.",
+    "She traded her name for a lie.",
+    "Every word out of him was a lie.",
+    "The witness rose to speak a lie.",
+    "He paid for the comfort of a lie.",
+    "You can hear the shape of a lie.",
+    "Somebody has to pay for that lie.",
+    "Both witnesses agreed on that lie.",
+    "He learned to breathe inside a lie.",
+    "Money bought the anchor of a lie.",
+    "Every word he swore became a lie.",
+    "His hands shake when he tells that lie.",
+    "Truth waits behind the door of a lie.",
+    "The tongue prefers a shape of his lie.",
+    "The mouth moves and out comes a lie."
+  ];
+
+  const LINES_B = [
+    "What we heard he must deny.",
+    "Press play and hear him deny.",
+    "That mouth was built to deny.",
+    "There is nothing here to deny.",
+    "Years pass and they will deny.",
+    "We hear him practice to deny.",
+    "Then he stood in court to deny.",
+    "What the tape shows he will deny.",
+    "There is nothing for him to deny.",
+    "The story breaks and they deny.",
+    "The evidence stacks up and they deny.",
+    "He opens his mouth to deny.",
+    "Cameras roll while the lawyers deny.",
+    "Under oath the men deny.",
+    "Days pass and the mouths deny.",
+    "Watch how the shoulders deny.",
+    "Give them a mirror and they deny.",
+    "Show them the tape and they deny.",
+    "Whatever comes to light they deny.",
+    "It takes a lifetime to deny.",
+    "The men in suits deny.",
+    "Bring the receipts and hear them deny.",
+    "His children learn to deny.",
+    "Put him on a stand and he will deny.",
+    "Some build a life to deny.",
+    "The world asks and they deny.",
+    "Let them speak and they deny.",
+    "Ask what happened and they deny.",
+    "The jury waits for him to deny.",
+    "He wakes with a mouth built to deny.",
+    "A microphone is all it takes to deny.",
+    "He raises a hand to deny.",
+    "The lawyers arrive and they deny.",
+    "Call the number and hear him deny.",
+    "The men who wrote it deny.",
+    "Roll the tape and watch him deny.",
+    "So the mouth opens to deny.",
+    "Morning comes and the men deny.",
+    "They gather in a room to deny.",
+    "Hand him the paper and he will deny.",
+    "Doors close and the men deny.",
+    "Money buys the men who deny.",
+    "Nobody taught him to deny.",
+    "It costs him nothing to deny.",
+    "The country waits while they deny."
+  ];
+
+  // ---------- dom ----------
+  const $ = id => document.getElementById(id);
+  const dot = $("dot"), statusEl = $("status"), fileEl = $("file"), dropEl = $("drop");
+  const runBtn = $("run"), rescoreBtn = $("rescore"), snapBtn = $("snap"), targetEl = $("target");
+  const reachNote = $("reachnote");
+  const poemEl = $("poem"), frameEl = $("frame"), tbody = $("tbody");
+  const altsEl = $("alts"), labelSlot = $("labelslot"), labelNote = $("labelnote"), pairStats = $("pairstats");
+  const copyPoemBtn = $("copypoem"), copyTableBtn = $("copytable");
+
+  $("poolsize").textContent = LINES_A.length + " × " + LINES_B.length + " = " +
+    (LINES_A.length * LINES_B.length).toLocaleString() + " pairings";
+
+  let fontReady = false;
+  let perLine = null;      // Map<string, metrics>
+  let lastResult = null;   // chosen pair + rows
+
+  function setStatus(kind, msg) {
+    dot.className = "dot" + (kind ? " " + kind : "");
+    statusEl.textContent = msg;
+  }
+
+  // ---------- text checks ----------
+  const norm = w => w.toLowerCase().replace(/[.]+$/, "");
+  function tokens(line) { return line.split(" ").map(norm).filter(Boolean); }
+  function noRepeats(a, b) {
+    const t = tokens(a).concat(tokens(b));
+    return t.length === new Set(t).size;
+  }
+  function textClean(line) {
+    return !/[,]/.test(line) && !/ {2}/.test(line) && !/\s[.!?;:]/.test(line) &&
+           !/[#\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(line) && /\.$/.test(line);
+  }
+  function endsWith(line, word) { return norm(line.split(" ").pop()) === word; }
+
+  function syllables(line) {
+    return line.toLowerCase().replace(/[^a-z\s]/g, "").split(/\s+/).filter(Boolean)
+      .reduce((n, w) => {
+        let m = w.match(/[aeiouy]+/g) || [];
+        let c = m.length;
+        if (/(?:[^laeiouy]|ll)e$/.test(w) && c > 1) c--;
+        return n + Math.max(1, c);
+      }, 0);
+  }
+
+  // ---------- measurement ----------
+  const mCanvas = document.createElement("canvas");
+  const mCtx = mCanvas.getContext("2d");
+  const sCanvas = document.createElement("canvas");
+  const sCtx = sCanvas.getContext("2d", { willReadFrequently: true });
+
+  function applyFont(ctx) {
+    ctx.font = MEASURE_FONT;
+    ctx.letterSpacing = "0px";
+    ctx.wordSpacing = "0px";
+  }
+
+  function fractional(text) {
+    applyFont(mCtx);
+    const m = mCtx.measureText(text);
+    return {
+      width: m.width,
+      left: m.actualBoundingBoxLeft,
+      right: m.actualBoundingBoxRight
+    };
+  }
+
+  // rightmost inked column -> right edge of that column, in CSS px
+  function inkRight(text, dpr) {
+    const w = Math.round(SCAN_W * dpr), h = Math.round(SCAN_H * dpr);
+    sCanvas.width = w; sCanvas.height = h;
+    sCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    sCtx.clearRect(0, 0, SCAN_W, SCAN_H);
+    applyFont(sCtx);
+    sCtx.textBaseline = "alphabetic";
+    sCtx.textAlign = "left";
+    sCtx.fillStyle = "#000";
+    sCtx.fillText(text, X0, BASELINE);
+
+    const data = sCtx.getImageData(0, 0, w, h).data;
+    for (let x = w - 1; x >= 0; x--) {
+      for (let y = 0; y < h; y++) {
+        if (data[(y * w + x) * 4 + 3] > 0) return (x + 1) / dpr;
+      }
+    }
+    return NaN;
+  }
+
+  function measureAll() {
+    const map = new Map();
+    for (const text of LINES_A.concat(LINES_B)) {
+      if (map.has(text)) continue;
+      const f = fractional(text);
+      map.set(text, {
+        text,
+        width: f.width,
+        left: f.left,
+        right: f.right,
+        ink1: inkRight(text, 1),
+        ink3: inkRight(text, 3),
+        syll: syllables(text),
+        clean: textClean(text)
+      });
+    }
+    return map;
+  }
+
+  // What right-edge values can this font actually land on? Measured, not assumed:
+  // if every advance comes back a whole number, the reachable endpoints form a 1 px
+  // lattice and most round target values are off it by construction.
+  function reachable(target) {
+    const vals = [...perLine.values()];
+    const wholeAdvances = vals.every(v => Number.isInteger(v.width));
+    const ends = [...new Set(vals.map(v => v.ink3))].sort((a, b) => a - b);
+    const nearest = ends.reduce((best, v) =>
+      Math.abs(v - target) < Math.abs(best - target) ? v : best, ends[0]);
+    return { wholeAdvances, ends, nearest, offset: ((nearest % 1) + 1) % 1 };
+  }
+
+  function updateReachNote(target) {
+    if (!perLine) { reachNote.textContent = ""; return; }
+    const r = reachable(target);
+    if (!r.wholeAdvances) {
+      reachNote.innerHTML = "This font reports fractional advances at 22.6666667&nbsp;px, so target endpoints are reachable on a continuum.";
+      return;
+    }
+    const off = Math.abs(r.nearest - target);
+    reachNote.innerHTML =
+      `Measured across ${perLine.size} lines this font returns <b>whole-number advances</b> at 22.6666667&nbsp;px, ` +
+      `so reachable right edges sit on a 1&nbsp;px lattice offset by ${r.offset.toFixed(3)}&nbsp;px. ` +
+      (off < 1e-6
+        ? `The ${target} px target is on that lattice.`
+        : `The ${target} px target is <b>not on it</b> — no wording can land there. Nearest reachable endpoint is <b>${r.nearest.toFixed(3)} px</b>, ${off.toFixed(3)} px away. ` +
+          `Line-to-line equality is unaffected; only the “lands on the target endpoint” clause of the pass condition is.`);
+  }
+
+  function search(target) {
+    const scored = [];
+    for (const a of LINES_A) {
+      const ma = perLine.get(a);
+      for (const b of LINES_B) {
+        const mb = perLine.get(b);
+        if (!noRepeats(a, b)) continue;
+        const gap3 = Math.abs(ma.ink3 - mb.ink3);
+        const gap1 = Math.abs(ma.ink1 - mb.ink1);
+        const gapBox = Math.abs(ma.right - mb.right);
+        const dist = (Math.abs(ma.ink3 - target) + Math.abs(mb.ink3 - target)) / 2;
+        scored.push({ a, b, ma, mb, gap3, gap1, gapBox, dist });
+      }
+    }
+    scored.sort((p, q) => (p.gap3 - q.gap3) || (p.dist - q.dist) || (p.gapBox - q.gapBox));
+    return scored;
+  }
+
+  // ---------- render ----------
+  const f6 = v => Number.isFinite(v) ? v.toFixed(6) : "—";
+  const f3 = v => Number.isFinite(v) ? v.toFixed(3) : "—";
+
+  function isChromium() {
+    const b = navigator.userAgentData?.brands?.map(x => x.brand).join(" ") || navigator.userAgent;
+    return /Chromium|Chrome|Edg/i.test(b) && !/Firefox/i.test(b);
+  }
+
+  function render(best, all, target) {
+    lastResult = { best, target };
+
+    poemEl.classList.remove("fontless");
+    poemEl.textContent = best.a + "\n" + best.b;
+
+    // guide + bounding boxes
+    frameEl.querySelectorAll(".guide,.bbox").forEach(n => n.remove());
+    const guide = document.createElement("div");
+    guide.className = "guide";
+    guide.style.left = target + "px";
+    guide.dataset.label = "target " + target + " px";
+    frameEl.appendChild(guide);
+
+    const lineH = 22.6666667 * 1.3125;
+    [best.ma, best.mb].forEach((m, i) => {
+      const box = document.createElement("div");
+      box.className = "bbox";
+      box.style.left = (X0 - m.left) + "px";
+      box.style.width = (m.left + m.right) + "px";
+      box.style.top = (i * lineH + 2) + "px";
+      box.style.height = (lineH - 4) + "px";
+      frameEl.appendChild(box);
+    });
+
+    // table
+    const eqBox = best.ma.right.toFixed(6) === best.mb.right.toFixed(6);
+    const eq1 = best.ma.ink1 === best.mb.ink1;
+    const eq3 = best.ma.ink3 === best.mb.ink3;
+    const onTarget = m => Math.abs(m.ink3 - target) < 1e-6;
+    const passAll = eqBox && eq1 && eq3 && onTarget(best.ma) && onTarget(best.mb);
+    const repeats = noRepeats(best.a, best.b);
+
+    const rows = [
+      { n: 1, m: best.ma, rhyme: endsWith(best.a, "lie") },
+      { n: 2, m: best.mb, rhyme: endsWith(best.b, "deny") }
+    ];
+
+    tbody.innerHTML = rows.map(r => {
+      const d = r.m.ink3 - target;
+      const dCls = Math.abs(d) < 1e-6 ? "delta-zero" : "";
+      const rowPass = (r.n === 1 ? eqBox && eq1 && eq3 : eqBox && eq1 && eq3) && onTarget(r.m) && repeats && r.rhyme && r.m.clean;
+      return `<tr>
+        <td class="num">${r.n}</td>
+        <td class="sentence" title="${r.m.text}">${r.m.text}</td>
+        <td class="num">${r.m.syll}</td>
+        <td class="num">${f6(r.m.width)}</td>
+        <td class="num">${f6(r.m.left)}</td>
+        <td class="num">${f6(r.m.right)}</td>
+        <td class="num ${dCls}">${d >= 0 ? "+" : ""}${f3(d)}</td>
+        <td class="num">${f3(r.m.ink1)}</td>
+        <td class="num">${f3(r.m.ink3)}</td>
+        <td class="${repeats ? "yes" : "no"}">${repeats ? "pass" : "fail"}</td>
+        <td class="${r.rhyme ? "yes" : "no"}">${r.rhyme ? "pass" : "fail"}</td>
+        <td class="${rowPass ? "yes" : "no"}">${rowPass ? "pass" : "near miss"}</td>
+      </tr>`;
+    }).join("");
+
+    // label
+    const chromium = isChromium();
+    const label = (passAll && chromium)
+      ? "Chromium visually exact for Twitter/X-style Chirp 17 pt"
+      : "Closest result only";
+    labelSlot.innerHTML = `<span class="label-badge ${passAll && chromium ? "pass" : "near"}">${label}</span>`;
+    labelNote.innerHTML = passAll && chromium
+      ? "All four equality checks passed in a Chromium browser with the supplied Chirp file. This is not <b>X exact</b>: Chromium cannot prove identical rendering inside X on iOS, which may ship a different font build, renderer, shaping engine, scale factor, or antialiasing path. Only calibration against an actual screenshot from the X iOS app would earn that label."
+      : "Not all four equality checks passed" + (chromium ? "" : " and this is not a Chromium browser") +
+        ", so this is the closest result only, shown with its exact deltas. Chromium cannot prove identical rendering inside X on iOS — different font build, renderer, shaping engine, scale factor, or antialiasing path — so <b>X exact</b> is never claimed here.";
+
+    pairStats.innerHTML = `
+      <dt>Ink gap @DPR 3</dt><dd>${f3(best.gap3)} px</dd>
+      <dt>Ink gap @DPR 1</dt><dd>${f3(best.gap1)} px</dd>
+      <dt>bboxRight gap</dt><dd>${f6(best.gapBox)} px</dd>
+      <dt>Mean Δ target</dt><dd>${f3(best.dist)} px</dd>
+      <dt>bboxRight equal</dt><dd class="${eqBox ? "yes" : "no"}">${eqBox}</dd>
+      <dt>Ink equal @DPR 1</dt><dd class="${eq1 ? "yes" : "no"}">${eq1}</dd>
+      <dt>Ink equal @DPR 3</dt><dd class="${eq3 ? "yes" : "no"}">${eq3}</dd>
+      <dt>Pairs searched</dt><dd>${all.length.toLocaleString()}</dd>
+      <dt>Browser</dt><dd>${chromium ? "Chromium" : "non-Chromium"}</dd>`;
+
+    // alternates
+    altsEl.innerHTML = all.slice(1, 11).map((p, i) => `
+      <li>
+        <span class="alt-lines">${p.a}<br>${p.b}</span>
+        <span class="gap">gap ${f3(p.gap3)} · Δtgt ${f3(p.dist)}
+          <button class="btn-sm" data-idx="${i + 1}">Use</button></span>
+      </li>`).join("");
+    altsEl.querySelectorAll("button").forEach(b => {
+      b.addEventListener("click", () => render(all[+b.dataset.idx], all, target));
+    });
+
+    copyPoemBtn.disabled = false;
+    copyTableBtn.disabled = false;
+  }
+
+  function tableText() {
+    if (!lastResult) return "";
+    const t = lastResult.target, b = lastResult.best;
+    const head = ["#", "sentence", "syll~", "width", "bboxLeft", "bboxRight",
+                  "delta_target", "ink_dpr1", "ink_dpr3"].join("\t");
+    const row = (n, m) => [n, m.text, m.syll, f6(m.width), f6(m.left), f6(m.right),
+                           f3(m.ink3 - t), f3(m.ink1), f3(m.ink3)].join("\t");
+    return [head, row(1, b.ma), row(2, b.mb),
+      "", `target=${t}  gap_dpr3=${f3(b.gap3)}  gap_dpr1=${f3(b.gap1)}  gap_bboxRight=${f6(b.gapBox)}`,
+      `font="${MEASURE_FONT}"  ua=${navigator.userAgent}`].join("\n");
+  }
+
+  // ---------- font loading ----------
+  async function loadFont(file) {
+    setStatus("busy", "Reading " + file.name + " …");
+    try {
+      const buf = await file.arrayBuffer();
+      const face = new FontFace("ChirpMeasure", buf, { weight: "400", style: "normal" });
+      await face.load();
+      document.fonts.add(face);
+      await document.fonts.ready;
+      if (face.status !== "loaded") throw new Error("font not loaded");
+      if (!document.fonts.check(CHECK_FONT)) throw new Error("font not usable at measurement size");
+      fontReady = true;
+      $("fontname").textContent = file.name + " · " + file.size.toLocaleString() + " bytes";
+      setStatus("ok", "Font loaded from bytes and usable at 22.6666667 px. Ready to measure.");
+      runBtn.disabled = false;
+      runBtn.click();
+    } catch (err) {
+      fontReady = false;
+      runBtn.disabled = true; rescoreBtn.disabled = true;
+      setStatus("err", "No font loaded — nothing measured. (" + err.message + ")");
+    }
+  }
+
+  // ---------- wiring ----------
+  dropEl.addEventListener("click", () => fileEl.click());
+  dropEl.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileEl.click(); } });
+  fileEl.addEventListener("change", e => { if (e.target.files[0]) loadFont(e.target.files[0]); });
+  ["dragenter", "dragover"].forEach(t => dropEl.addEventListener(t, e => { e.preventDefault(); dropEl.classList.add("hot"); }));
+  ["dragleave", "drop"].forEach(t => dropEl.addEventListener(t, e => { e.preventDefault(); dropEl.classList.remove("hot"); }));
+  dropEl.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (f) loadFont(f); });
+
+  runBtn.addEventListener("click", () => {
+    if (!fontReady) { setStatus("err", "No font loaded — nothing measured."); return; }
+    setStatus("busy", "Measuring " + (LINES_A.length + LINES_B.length) + " lines and scanning ink …");
+    requestAnimationFrame(() => {
+      const t0 = performance.now();
+      perLine = measureAll();
+      const target = parseFloat(targetEl.value);
+      const all = search(target);
+      if (!all.length) { setStatus("err", "No pair survives the no-repeated-words filter."); return; }
+      render(all[0], all, target);
+      window.__all = all;
+      updateReachNote(target);
+      rescoreBtn.disabled = false;
+      snapBtn.disabled = false;
+      setStatus("ok", "Measured " + perLine.size + " lines, searched " +
+        all.length.toLocaleString() + " valid pairings in " + Math.round(performance.now() - t0) + " ms.");
+    });
+  });
+
+  rescoreBtn.addEventListener("click", () => {
+    if (!perLine) return;
+    const target = parseFloat(targetEl.value);
+    const all = search(target);
+    window.__all = all;
+    render(all[0], all, target);
+    updateReachNote(target);
+    setStatus("ok", "Re-scored " + all.length.toLocaleString() + " pairings against target " + target + " px.");
+  });
+
+  snapBtn.addEventListener("click", () => {
+    if (!perLine) return;
+    const r = reachable(parseFloat(targetEl.value));
+    targetEl.value = r.nearest.toFixed(6);
+    const target = parseFloat(targetEl.value);
+    const all = search(target);
+    window.__all = all;
+    render(all[0], all, target);
+    updateReachNote(target);
+    setStatus("ok", "Target moved to the nearest endpoint this font can actually reach: " + target + " px.");
+  });
+
+  copyPoemBtn.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(lastResult.best.a + "\n" + lastResult.best.b);
+    copyPoemBtn.textContent = "Copied"; setTimeout(() => copyPoemBtn.textContent = "Copy poem", 1200);
+  });
+  copyTableBtn.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(tableText());
+    copyTableBtn.textContent = "Copied"; setTimeout(() => copyTableBtn.textContent = "Copy table", 1200);
+  });
+
+  // expose for headless drivers
+  window.__harness = {
+    get ready() { return fontReady; },
+    loadFontFromBuffer: async buf => {
+      const face = new FontFace("ChirpMeasure", buf, { weight: "400", style: "normal" });
+      await face.load(); document.fonts.add(face); await document.fonts.ready;
+      fontReady = face.status === "loaded" && document.fonts.check(CHECK_FONT);
+      return fontReady;
+    },
+    measureAll: () => (perLine = measureAll()),
+    search: t => search(t),
+    LINES_A, LINES_B
+  };
+})();
+</script>
