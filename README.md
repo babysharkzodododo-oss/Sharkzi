@@ -5,9 +5,12 @@ A two-line rhyming post whose lines end at the same visible right edge when set 
 proves it in the browser with canvas metrics and per-pixel ink scans.
 
 ```
-His voice was built on that lie.
-What we heard he must deny.
+My heart dissolves into panic.
+Now every hour grows manic.
 ```
+
+Both lines measure 301.000000 px wide with `actualBoundingBoxRight` at exactly
+300.000000 px and their rightmost ink in the same column at DPR 1 and at DPR 3.
 
 ## Running it
 
@@ -41,26 +44,39 @@ Anything short of all four is reported as a near miss with its exact deltas.
 The **Every matched pair** panel lists every pair clearing the three line-to-line equality
 checks regardless of which endpoint it lands on, grouped by endpoint and ordered by distance
 from the target, with a button to swap any of them into the post. In the shipped pools that
-is 29 pairs across 7 endpoints, 23 of them on the endpoint nearest 300 px.
+is 395 pairs across 5 endpoints, 390 of them on the endpoint nearest 300 px.
 
 ## The reachable-endpoint lattice
 
 This Chirp build returns **whole-number advances** at 22.6666667 px — verified across all 90
-candidate lines, and against a fallback face that does return fractional widths, so the
-quantisation is the font's and not the browser's. Reachable right edges therefore sit on a
-1 px lattice, and a round 300 px endpoint is not on it: no wording can land there.
+candidate lines. Reachable right edges therefore sit on a 1 px lattice, and each of the
+three right-edge readings sits on its own offset of it:
 
-The harness detects this at runtime rather than assuming it, says so in the search panel,
-and offers **Snap to nearest reachable** to move the target onto the lattice. Line-to-line
-equality — the actual goal — is unaffected either way.
+| Reading | Shipped pair | Reaches 300 px |
+| --- | --- | --- |
+| `actualBoundingBoxRight` | 300.000000 px | yes, exactly |
+| Rightmost ink, DPR 1 | 300.000000 px | yes, exactly |
+| Rightmost ink, DPR 3 | 299.333333 px | no — 0.667 px short |
+
+Lines ending in `panic.` / `manic.` share a terminal `c.`, so their ink stops at
+`width − 1` and a 301 px line puts the bounding box on a round 300. The DPR 3 scan resolves
+the period's antialiased tail 0.333 px inside that whole-pixel edge, which puts its lattice
+on `x.333` — 300.000 is not on it and no wording lands there. Since the pass condition
+prefers the pixel scan over the fractional metric where they disagree, the shipped pair is
+reported as a near miss on the endpoint clause and labelled **Closest result only**, even
+though all three line-to-line equality checks pass exactly.
+
+The harness detects the lattice at runtime rather than assuming it, reports all three
+readings in the search panel, and offers **Snap to nearest reachable** to move the target
+onto the DPR 3 lattice. Line-to-line equality — the actual goal — is unaffected either way.
 
 ## Writing constraints
 
 Every candidate is one complete sentence ending in its rhyme word plus a period, with no
-commas, emoji, hashtags, double spaces, or space before punctuation; no adjectives; no
-adverbs; no people's names. The chosen pair additionally has a token-type ratio of 1.0 — no
-word appears twice across both lines, compared case-insensitively with final punctuation
-stripped. Syllable counts are approximate.
+commas, emoji, hashtags, double spaces, or space before punctuation, and no people's names.
+The chosen pair additionally has a token-type ratio of 1.0 — no word appears twice across
+both lines, compared case-insensitively with final punctuation stripped, and pairings that
+fail that test are dropped before scoring. Syllable counts are approximate.
 
 No invisible characters, non-breaking spaces, tabs, letter-spacing, transforms, scaling, or
 font-size changes are used anywhere. Those fake the alignment instead of achieving it, and

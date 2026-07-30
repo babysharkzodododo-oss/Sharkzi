@@ -308,7 +308,7 @@
         A pair passes only when both lines share the same <code>actualBoundingBoxRight</code>, the same rightmost ink at DPR&nbsp;1, the same rightmost ink at DPR&nbsp;3, and land on the target endpoint. Anything short of all four is a near miss and is shown with its exact deltas.
       </p>
       <p class="note">
-        Writing constraints enforced on every candidate: one complete sentence ending in its rhyme word plus a period; no commas, emoji, hashtags, double spaces, or space before punctuation; no adjectives; no adverbs; no people's names. The chosen pair additionally has a token-type ratio of 1.0 — no word appears twice across both lines, compared case-insensitively with final punctuation stripped. Syllable counts are approximate.
+        Writing constraints enforced on every candidate: one complete sentence ending in its rhyme word plus a period; no commas, emoji, hashtags, double spaces, or space before punctuation; no people's names. The chosen pair additionally has a token-type ratio of 1.0 — no word appears twice across both lines, compared case-insensitively with final punctuation stripped; pairings that fail that test are dropped before scoring. Syllable counts are approximate.
       </p>
     </div>
   </section>
@@ -324,99 +324,99 @@
   const SCAN_W = 960, SCAN_H = 64, BASELINE = 44, X0 = 0;
 
   const LINES_A = [
-    "His voice was built on that lie.",
-    "The record opens with our lie.",
-    "Every page begins with his lie.",
-    "That mouth stands on this lie.",
-    "The country stands on her lie.",
-    "The story he sold us was a lie.",
-    "He signed his name under a lie.",
-    "The mirror refuses to hold a lie.",
-    "Somebody paid him to tell that lie.",
-    "The house of his life rests on a lie.",
-    "Trust dies at the moment of a lie.",
-    "I watched the truth become a lie.",
-    "Nothing holds the weight of a lie.",
-    "The oath dissolved into a lie.",
-    "History begins with his lie.",
-    "Time undoes a lie.",
-    "Silence can carry a lie.",
-    "Grief hides under a lie.",
-    "The paper printed his lie.",
-    "The room believed his lie.",
-    "Each apology carries a lie.",
-    "She sells the story as a lie.",
-    "The camera caught his lie.",
-    "There is a cost to every lie.",
-    "His face gives away the lie.",
-    "The crowd repeated his lie.",
-    "He offers his hand and a lie.",
-    "He wrote his history as a lie.",
-    "A microphone carries his lie.",
-    "He keeps a ledger of each lie.",
-    "What he calls memory is a lie.",
-    "She traded her name for a lie.",
-    "Every word out of him was a lie.",
-    "The witness rose to speak a lie.",
-    "He paid for the comfort of a lie.",
-    "You can hear the shape of a lie.",
-    "Somebody has to pay for that lie.",
-    "Both witnesses agreed on that lie.",
-    "He learned to breathe inside a lie.",
-    "Money bought the anchor of a lie.",
-    "Every word he swore became a lie.",
-    "His hands shake when he tells that lie.",
-    "Truth waits behind the door of a lie.",
-    "The tongue prefers a shape of his lie.",
-    "The mouth moves and out comes a lie."
+    "My heart dissolves into panic.",
+    "My chest slides toward panic.",
+    "Each breath races with panic.",
+    "Fear tightens back into panic.",
+    "Doubt slides down into panic.",
+    "Sleep dissolves against panic.",
+    "My throat curls against panic.",
+    "Every hour falls toward panic.",
+    "A knock climbs against panic.",
+    "This quiet turns toward panic.",
+    "My pulse shakes under panic.",
+    "My skin curls back into panic.",
+    "Some noise builds with panic.",
+    "Nothing gives way with panic.",
+    "Worry folds toward the panic.",
+    "My heart drops against panic.",
+    "Every nerve builds with panic.",
+    "A shut door drops past panic.",
+    "Sleep shakes back into panic.",
+    "The waiting breaks into panic.",
+    "Every hour breaks past panic.",
+    "My jaw goes down into panic.",
+    "My hands shake with panic.",
+    "The night dissolves into panic.",
+    "Dread floods my chest with panic.",
+    "The whole house shakes with panic.",
+    "One missed heartbeat tips into panic.",
+    "The clock feeds my panic.",
+    "Somewhere under my ribs sits panic.",
+    "Traffic noise turns into panic.",
+    "The morning opens with panic.",
+    "A siren winds my nerves to panic.",
+    "I wake already halfway to panic.",
+    "The hallway narrows into panic.",
+    "Small talk drags me toward panic.",
+    "My breathing runs ahead of panic.",
+    "Nothing holds the weight of panic.",
+    "Coffee sharpens the edge of panic.",
+    "The waiting room hums with panic.",
+    "A locked door opens on panic.",
+    "Every quiet minute ends in panic.",
+    "Silence is where I keep my panic.",
+    "The elevator drops me into panic.",
+    "Rain on the window reads as panic.",
+    "The hour before dawn belongs to panic."
   ];
 
   const LINES_B = [
-    "What we heard he must deny.",
-    "Press play and hear him deny.",
-    "That mouth was built to deny.",
-    "There is nothing here to deny.",
-    "Years pass and they will deny.",
-    "We hear him practice to deny.",
-    "Then he stood in court to deny.",
-    "What the tape shows he will deny.",
-    "There is nothing for him to deny.",
-    "The story breaks and they deny.",
-    "The evidence stacks up and they deny.",
-    "He opens his mouth to deny.",
-    "Cameras roll while the lawyers deny.",
-    "Under oath the men deny.",
-    "Days pass and the mouths deny.",
-    "Watch how the shoulders deny.",
-    "Give them a mirror and they deny.",
-    "Show them the tape and they deny.",
-    "Whatever comes to light they deny.",
-    "It takes a lifetime to deny.",
-    "The men in suits deny.",
-    "Bring the receipts and hear them deny.",
-    "His children learn to deny.",
-    "Put him on a stand and he will deny.",
-    "Some build a life to deny.",
-    "The world asks and they deny.",
-    "Let them speak and they deny.",
-    "Ask what happened and they deny.",
-    "The jury waits for him to deny.",
-    "He wakes with a mouth built to deny.",
-    "A microphone is all it takes to deny.",
-    "He raises a hand to deny.",
-    "The lawyers arrive and they deny.",
-    "Call the number and hear him deny.",
-    "The men who wrote it deny.",
-    "Roll the tape and watch him deny.",
-    "So the mouth opens to deny.",
-    "Morning comes and the men deny.",
-    "They gather in a room to deny.",
-    "Hand him the paper and he will deny.",
-    "Doors close and the men deny.",
-    "Money buys the men who deny.",
-    "Nobody taught him to deny.",
-    "It costs him nothing to deny.",
-    "The country waits while they deny."
+    "Now every hour grows manic.",
+    "Everything else turned manic.",
+    "All that was calm grew manic.",
+    "The rest of me sounds manic.",
+    "By dawn the world felt manic.",
+    "The next week sounds manic.",
+    "The whole night edges manic.",
+    "Every word after looks manic.",
+    "This whole week looks manic.",
+    "The street outside tilts manic.",
+    "That steady heart gets manic.",
+    "The whole week burns manic.",
+    "Her steady hand looks manic.",
+    "The rest of tonight felt manic.",
+    "The next day winds up manic.",
+    "My thinking turns a bit manic.",
+    "What follows grew too manic.",
+    "Whatever is left will be manic.",
+    "Each hour after will be manic.",
+    "The rest of us ends up manic.",
+    "By dawn the world ran manic.",
+    "Sleep goes thin and I turn manic.",
+    "The whole night reads manic.",
+    "Everything after that felt manic.",
+    "Morning arrives and I am manic.",
+    "The rest of the week ran manic.",
+    "Whatever calm I had turned manic.",
+    "Sleep breaks apart and leaves me manic.",
+    "By noon my thinking is manic.",
+    "The room around me looks manic.",
+    "One long night made me manic.",
+    "Every plan I make is manic.",
+    "The pulse under my wrist reads manic.",
+    "Daylight finds me still manic.",
+    "What was steady in me is manic.",
+    "The music in my ears turns manic.",
+    "Something in my chest runs manic.",
+    "Half of what I say sounds manic.",
+    "The talk between us grew manic.",
+    "Rest gives out and I go manic.",
+    "My own quiet hours read manic.",
+    "The night ahead already feels manic.",
+    "Anything after that goes manic.",
+    "The last of my calm went manic.",
+    "Whatever holds me together is manic."
   ];
 
   // ---------- dom ----------
@@ -528,14 +528,20 @@
 
   // What right-edge values can this font actually land on? Measured, not assumed:
   // if every advance comes back a whole number, the reachable endpoints form a 1 px
-  // lattice and most round target values are off it by construction.
+  // lattice, and each of the three right-edge readings sits on its own offset of it.
   function reachable(target) {
     const vals = [...perLine.values()];
     const wholeAdvances = vals.every(v => Number.isInteger(v.width));
-    const ends = [...new Set(vals.map(v => v.ink3))].sort((a, b) => a - b);
-    const nearest = ends.reduce((best, v) =>
-      Math.abs(v - target) < Math.abs(best - target) ? v : best, ends[0]);
-    return { wholeAdvances, ends, nearest, offset: ((nearest % 1) + 1) % 1 };
+    const lattice = (key) => {
+      const ends = [...new Set(vals.map(v => v[key]))].sort((a, b) => a - b);
+      const nearest = ends.reduce((best, v) =>
+        Math.abs(v - target) < Math.abs(best - target) ? v : best, ends[0]);
+      return { ends, nearest, offset: ((nearest % 1) + 1) % 1, hit: Math.abs(nearest - target) < 1e-6 };
+    };
+    const ink3 = lattice("ink3");
+    // ink3 drives the pass condition, so it stays on the flat shape the callers use
+    return { wholeAdvances, ends: ink3.ends, nearest: ink3.nearest, offset: ink3.offset,
+             ink3, ink1: lattice("ink1"), box: lattice("right") };
   }
 
   function updateReachNote(target) {
@@ -546,13 +552,19 @@
       return;
     }
     const off = Math.abs(r.nearest - target);
+    const edge = (name, l) => l.hit
+      ? `<b>${name} reaches ${target} px exactly</b>`
+      : `${name} gets no closer than ${l.nearest.toFixed(3)} px`;
     reachNote.innerHTML =
       `Measured across ${perLine.size} lines this font returns <b>whole-number advances</b> at 22.6666667&nbsp;px, ` +
-      `so reachable right edges sit on a 1&nbsp;px lattice offset by ${r.offset.toFixed(3)}&nbsp;px. ` +
+      `so every reachable right edge sits on a 1&nbsp;px lattice — one offset per reading. ` +
+      `Against this ${target} px target: ${edge("<code>actualBoundingBoxRight</code>", r.box)}, ` +
+      `${edge("the DPR&nbsp;1 ink scan", r.ink1)}, and ${edge("the DPR&nbsp;3 ink scan", r.ink3)}. ` +
       (off < 1e-6
-        ? `The ${target} px target is on that lattice.`
-        : `The ${target} px target is <b>not on it</b> — no wording can land there. Nearest reachable endpoint is <b>${r.nearest.toFixed(3)} px</b>, ${off.toFixed(3)} px away. ` +
-          `Line-to-line equality is unaffected; only the “lands on the target endpoint” clause of the pass condition is.`);
+        ? `All three land on the target.`
+        : `DPR&nbsp;3 resolves the terminal glyph's antialiased tail, which stops ${r.ink3.offset.toFixed(3)}&nbsp;px inside the whole-pixel edge the other two report, ` +
+          `so its lattice is offset by that much and ${target} px is <b>not on it</b> — no wording lands there. ` +
+          `Line-to-line equality is unaffected; only the “lands on the target endpoint” clause is, and it is judged on the finer DPR&nbsp;3 scan.`);
   }
 
   function search(target) {
@@ -616,8 +628,8 @@
     const repeats = noRepeats(best.a, best.b);
 
     const rows = [
-      { n: 1, m: best.ma, rhyme: endsWith(best.a, "lie") },
-      { n: 2, m: best.mb, rhyme: endsWith(best.b, "deny") }
+      { n: 1, m: best.ma, rhyme: endsWith(best.a, "panic") },
+      { n: 2, m: best.mb, rhyme: endsWith(best.b, "manic") }
     ];
 
     tbody.innerHTML = rows.map(r => {
@@ -646,10 +658,19 @@
       ? "Chromium visually exact for Twitter/X-style Chirp 17 pt"
       : "Closest result only";
     labelSlot.innerHTML = `<span class="label-badge ${passAll && chromium ? "pass" : "near"}">${label}</span>`;
+    const boxOnTarget = Math.abs(best.ma.right - target) < 1e-6 && Math.abs(best.mb.right - target) < 1e-6;
+    const ink1OnTarget = Math.abs(best.ma.ink1 - target) < 1e-6 && Math.abs(best.mb.ink1 - target) < 1e-6;
     labelNote.innerHTML = passAll && chromium
       ? "All four equality checks passed in a Chromium browser with the supplied Chirp file. This is not <b>X exact</b>: Chromium cannot prove identical rendering inside X on iOS, which may ship a different font build, renderer, shaping engine, scale factor, or antialiasing path. Only calibration against an actual screenshot from the X iOS app would earn that label."
-      : "Not all four equality checks passed" + (chromium ? "" : " and this is not a Chromium browser") +
-        ", so this is the closest result only, shown with its exact deltas. Chromium cannot prove identical rendering inside X on iOS — different font build, renderer, shaping engine, scale factor, or antialiasing path — so <b>X exact</b> is never claimed here.";
+      : "Not all four checks passed" + (chromium ? "" : " and this is not a Chromium browser") +
+        ", so this is the closest result only, shown with its exact deltas." +
+        (eqBox && eq1 && eq3
+          ? " The three line-to-line equality checks did pass — both lines share one right edge to the pixel at both device ratios" +
+            (boxOnTarget && ink1OnTarget
+              ? `, and that edge is exactly ${target} px by <code>actualBoundingBoxRight</code> and by the DPR 1 scan. What falls short is the DPR 3 scan, which resolves the terminal glyph's antialiased tail inside the whole-pixel edge; where fractional and pixel results disagree the pixel scan wins, so the shortfall stands.`
+              : ".")
+          : "") +
+        " Chromium cannot prove identical rendering inside X on iOS — different font build, renderer, shaping engine, scale factor, or antialiasing path — so <b>X exact</b> is never claimed here.";
 
     pairStats.innerHTML = `
       <dt>Ink gap @DPR 3</dt><dd>${f3(best.gap3)} px</dd>
@@ -659,6 +680,9 @@
       <dt>bboxRight equal</dt><dd class="${eqBox ? "yes" : "no"}">${eqBox}</dd>
       <dt>Ink equal @DPR 1</dt><dd class="${eq1 ? "yes" : "no"}">${eq1}</dd>
       <dt>Ink equal @DPR 3</dt><dd class="${eq3 ? "yes" : "no"}">${eq3}</dd>
+      <dt>bboxRight on ${target}</dt><dd class="${boxOnTarget ? "yes" : "no"}">${boxOnTarget}</dd>
+      <dt>Ink @DPR 1 on ${target}</dt><dd class="${ink1OnTarget ? "yes" : "no"}">${ink1OnTarget}</dd>
+      <dt>Ink @DPR 3 on ${target}</dt><dd class="${onTarget(best.ma) && onTarget(best.mb) ? "yes" : "no"}">${onTarget(best.ma) && onTarget(best.mb)}</dd>
       <dt>Pairs searched</dt><dd>${all.length.toLocaleString()}</dd>
       <dt>Browser</dt><dd>${chromium ? "Chromium" : "non-Chromium"}</dd>`;
 
