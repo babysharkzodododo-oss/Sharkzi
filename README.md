@@ -75,3 +75,58 @@ the pixel scan would be measuring the lie rather than the fix.
   the app may ship a different font build, renderer, shaping engine, scale factor, or
   antialiasing path. Only calibration against an actual screenshot from the X iOS app would
   earn that label.
+
+# Rhyming synonyms — Datamuse intersection finder
+
+`rhyming-synonyms.html` finds words that mean the same **and** rhyme. It is the writing-side
+companion to the harness above: the harness measures rhyming lines, this finds the words to
+build them from. Open it in a browser — no key, no build, no dependencies.
+
+Unlike the harness, **this page needs network access** to `api.datamuse.com`. Datamuse sends
+`Access-Control-Allow-Origin: *`, so opening the file straight from disk works.
+
+## The three questions it answers
+
+- **Synonyms of a word that rhyme with it** — `moan` → the words that both mean *moan* and
+  rhyme with *moan*.
+- **Means like A, rhymes with B** — the couplet-writing case: a word meaning *deny* that
+  rhymes with *lie*.
+- **Scan a word list** — the same self-rhyme probe run over a pool of words, grouped by which
+  probe word produced hits. A starting pool of 80 words ships with the page; it is a list of
+  words *to test*, not a list of answers.
+
+## How a hit is confirmed
+
+Meaning sets (`rel_syn`, `ml`) and rhyme sets (`rel_rhy`, `rel_nry`) are requested separately
+and intersected in the page. That intersection is the source of truth. The server's own
+combined query — `rel_syn=…&rel_rhy=…` — is issued as well and reported per row under **Server
+combo**, but it gates nothing: where the two disagree the client-side intersection wins,
+because it is set algebra over words the API itself returned for each constraint alone. Every
+request is listed with its URL and result count, so any row can be traced back.
+
+Three failure modes are called out rather than papered over:
+
+- **Rich rhymes.** Datamuse counts `bemoan` as a rhyme for `moan` and as related in meaning, so
+  affixed forms of one root pass both constraints. Pairs where one word contains the other are
+  flagged `root` and dropped by default. The test is spelling, not etymology — a heuristic.
+- **Truncation.** Intersecting two capped lists silently loses hits, so sets are requested at
+  `max=1000` and any set returning at the cap is marked. A capped set means the table is a
+  lower bound.
+- **Request failure.** A failed request produces an *Incomplete* label naming the failure, not
+  an empty table implying nothing rhymed. "No rhyming synonyms found" is a separate label,
+  reached only when every request succeeded and the sets genuinely do not overlap.
+
+Filters — part of speech matching the source word, syllable range, minimum frequency per
+million, single words only — all come from `md=dpsf` on the same requests, so they cost no
+extra round trips. The one exception is the source word's own part of speech, which needs one
+`sp=` lookup and is fetched only when that filter is on. The requests panel shows the predicted
+cost per run before you spend it.
+
+## Verifying it
+
+`window.__rhyme` exposes `run`, `probe`, the filter and ranking functions, the request log, and
+`setFetch` for stubbing the API. The logic — set intersection, each filter, ranking, cap
+detection, both failure paths, scan grouping, exports — is verified against mocked
+Datamuse-shaped payloads through that seam. Live API behaviour is not covered by those checks:
+response shape follows the documented API, and the only way to confirm it is to run the page
+against the real host.
