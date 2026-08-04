@@ -75,3 +75,23 @@ the pixel scan would be measuring the lie rather than the fix.
   the app may ship a different font build, renderer, shaping engine, scale factor, or
   antialiasing path. Only calibration against an actual screenshot from the X iOS app would
   earn that label.
+
+## Finding candidate words
+
+`datamuse-semantic-rhymes.py` looks up words related to a topic by meaning through the
+[Datamuse](https://www.datamuse.com/api/) `ml` endpoint — the semantic counterpart to a
+rhyme lookup, useful for stocking the candidate pools the harness pairs off.
+
+```
+./datamuse-semantic-rhymes.py --topic "Christian religion" --max 100 --out topic.md
+```
+
+Defaults to `Christian religion` and 100 results, writing a numbered Markdown table to
+stdout; `--out` redirects it to a file and `--json` additionally saves the untouched API
+response. Results keep Datamuse's own ordering and relevance scores rather than being
+re-ranked, and the script reports when the API returned fewer words than asked for instead
+of padding to the requested count. Python 3, standard library only, no API key.
+
+Unlike the harness, this script *does* need network access — specifically to
+`api.datamuse.com`. A 403 or 407 is almost always an egress proxy declining that host
+rather than anything wrong with the request, and the script says so when it sees one.
