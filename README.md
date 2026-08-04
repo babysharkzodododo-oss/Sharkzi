@@ -92,8 +92,11 @@ Unlike the harness, **this page needs network access** to `api.datamuse.com`. Da
 - **Means like A, rhymes with B** — the couplet-writing case: a word meaning *deny* that
   rhymes with *lie*.
 - **Scan a word list** — the same self-rhyme probe run over a pool of words, grouped by which
-  probe word produced hits. A starting pool of 80 words ships with the page; it is a list of
-  words *to test*, not a list of answers.
+  probe word produced hits. A starting pool of 97 words ships with the page, drawn from clusters
+  where English appears to have doubled up on sound and sense — `moan`/`groan`, `swirl`/`twirl`/
+  `whirl`, `whack`/`smack`/`thwack`, `stash`/`cache`. It is a list of words *to test*, not a list
+  of answers: pairs that read as synonymous to a human can still fail the stricter WordNet-backed
+  `rel_syn` check, and the scan is what tells you which ones Datamuse will actually vouch for.
 
 ## How a hit is confirmed
 

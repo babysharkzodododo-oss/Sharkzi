@@ -379,18 +379,28 @@
 
   const API = "https://api.datamuse.com/words";
 
-  // Probe words chosen because English tends to pair sound and sense in this register —
-  // onomatopoeic verbs, motion, noise, mess. These are candidates to test, not results:
-  // whether any of them actually has a rhyming synonym is Datamuse's answer, not this list's.
+  // 97 words from clusters where English seems to have doubled up on sound and sense —
+  // mostly onomatopoeic verbs, motion, noise and mess, where a word's synonym often rhymes
+  // with it. Every entry is a candidate to test, not a result: whether any of these actually
+  // has a rhyming synonym is Datamuse's answer, not this list's, and pairs that read as
+  // synonymous to a human may still fail the stricter WordNet-backed rel_syn test.
   const SEED_POOL = [
-    "moan", "gleam", "slime", "quiver", "quake", "jeer", "bump", "swipe", "scrub", "lug",
-    "hurry", "prattle", "mumble", "whack", "chatter", "amble", "snip", "gab", "nick", "plod",
-    "smash", "sneaky", "grumble", "jumble", "batter", "scatter", "gash", "rip", "toss", "heap",
-    "peek", "sob", "fib", "din", "tidy", "roam", "heave", "sway", "lurch", "trudge",
-    "holler", "yell", "shout", "grouse", "gripe", "quibble", "haggle", "tangle", "wrangle", "muddle",
-    "flick", "chuck", "fling", "hurl", "shove", "swat", "scoot", "dash", "sprint", "bolt",
-    "grime", "muck", "sludge", "stink", "reek", "rot", "chill", "bright", "glum", "grim",
-    "weep", "wail", "fret", "mope", "whine", "sneer", "taunt", "spurn", "shake", "shiver"
+    "moan", "groan", "gleam", "beam", "shiver", "quiver", "quake", "shake",
+    "jeer", "sneer", "leer", "peer", "glare", "stare", "flare",
+    "slime", "grime", "smash", "bash", "crash",
+    "whack", "smack", "thwack", "crack", "hack",
+    "chop", "lop", "crop", "hurry", "scurry", "flurry",
+    "swirl", "twirl", "whirl", "howl", "yowl", "growl", "scowl",
+    "stash", "cache", "grab", "nab", "snatch", "catch",
+    "hustle", "bustle", "wiggle", "jiggle", "wriggle",
+    "snip", "clip", "gash", "slash", "fling", "sling",
+    "amble", "ramble", "mumble", "grumble", "rumble",
+    "prattle", "rattle", "chatter", "clatter", "spatter", "splatter", "scatter",
+    "bump", "thump", "lump", "glide", "slide", "droop", "stoop",
+    "wobble", "hobble", "gush", "flush", "rush", "muddle", "befuddle",
+    "bawl", "squall", "brawl", "maul", "bright", "light",
+    "lug", "tug", "gab", "blab", "fret", "sweat",
+    "wrangle", "tangle", "trudge", "drudge"
   ];
 
   const $ = id => document.getElementById(id);
