@@ -66,6 +66,26 @@ No invisible characters, non-breaking spaces, tabs, letter-spacing, transforms, 
 font-size changes are used anywhere. Those fake the alignment instead of achieving it, and
 the pixel scan would be measuring the lie rather than the fix.
 
+## Three-syllable rhymes
+
+The pair in the post rhymes on one syllable. `triple-rhymes.py` searches the CMU
+Pronouncing Dictionary for the three-syllable kind — primary stress on the
+antepenultimate syllable, every phoneme from that vowel to the end identical,
+and different onsets on the stressed syllable, since in-SAN-ity and SAN-ity are
+the same sound rather than a rhyme.
+
+Suffix rhymes are excluded, which is what makes the search worth running: of the
+4,253 pairs that rhyme perfectly by sound alone, 152 survive. The rest are
+-ology against -ology and -ability against -ability, morphemes agreeing with
+themselves. [`three-syllable-rhymes.md`](three-syllable-rhymes.md) has the full
+list, the rules, and the reproduction commands; `--selftest` checks the rules
+against twenty known cases and needs no data files.
+
+```
+his-to-ry / mys-te-ry        an-te-lope / can-ta-loupe
+min-is-ter / sin-is-ter      mu-ti-ny  / scru-ti-ny
+```
+
 ## Labels
 
 - **"Chromium visually exact for Twitter/X-style Chirp 17 pt"** — the supplied Chirp file
